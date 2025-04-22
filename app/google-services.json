@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "833793740358",
+    "project_id": "primecarev2",
+    "storage_bucket": "primecarev2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:833793740358:android:e3e0f9ee8e1d69e54ec447",
+        "android_client_info": {
+          "package_name": "com.example.primecare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTBGjrFzQO5207OEcJM4uX-h4i1bJ5Cz0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">PrimeCare</string>
+
+
+    <string name="description">descriptiondescriptiondescription</string>
+    <string name="onBoardingTitle1">Welcome to InspiCulture</string>
+    <string name="onBoardingTitle2">Discover New Cultures</string>
+    <string name="onBoardingTitle3">Personalized Recommendations</string>
+
+    <!-- Onboarding Descriptions -->
+    <string name="onBoardingText1">Explore films, books, music, and more tailored just for you.</string>
+    <string name="onBoardingText2">Discover content from various cultures and expand your horizons.</string>
+    <string name="onBoardingText3">Get recommendations based on your preferences and interests.</string>
+    <string name="server_client_id">818292442267-h4orf4jevj35aegldpa3dulpv9lfj8jr.apps.googleusercontent.com</string>
+
+</resources>
