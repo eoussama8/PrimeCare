@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.example.primecare.Auth.LoginActivity
 import com.example.primecare.MainActivity
 import com.example.primecare.data.ThemePreferences
 import com.example.primecare.ui.theme.PrimeCareTheme
@@ -34,7 +35,7 @@ class OnBoardingActivity : ComponentActivity() {
                     OnBoarding(
                         onFinish = {
                             prefs.edit().putBoolean("isFirstRun", false).apply()
-                            startActivity(Intent(this@OnBoardingActivity, MainActivity::class.java))
+                            startActivity(Intent(this@OnBoardingActivity, LoginActivity::class.java))
                             finish()
                         }
                     )

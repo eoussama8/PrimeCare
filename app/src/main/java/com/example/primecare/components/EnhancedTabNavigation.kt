@@ -30,7 +30,7 @@ import com.example.primecare.R
 
 val TabItems = listOf(
     R.drawable.home to "Home",
-    R.drawable.book to "Books",
+    R.drawable.meal to "Meals",
     R.drawable.movie to "Shows",
     R.drawable.music to "Music",
     R.drawable.settings to "Settings"

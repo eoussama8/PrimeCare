@@ -12,7 +12,20 @@
           "package_name": "com.example.primecare"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "833793740358-ggdq9bk7qo9gi3ho1s1engmb9l33vp45.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.primecare",
+            "certificate_hash": "7d6bd33af6d7e17b429135b407d5d0b309b3215b"
+          }
+        },
+        {
+          "client_id": "833793740358-ctc8jbp2dubuvegl4703qe8f5fskgk0h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCTBGjrFzQO5207OEcJM4uX-h4i1bJ5Cz0"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "833793740358-ctc8jbp2dubuvegl4703qe8f5fskgk0h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

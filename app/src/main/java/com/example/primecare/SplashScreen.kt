@@ -33,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.primecare.Auth.LoginActivity
 import com.example.primecare.ui.theme.PrimeCareTheme
 import com.example.primecare.ui.theme.Typography
 import com.example.primecare.OnBoarding.OnBoardingActivity
@@ -69,7 +70,7 @@ fun SplashScreen() {
         descriptionAlpha.animateTo(1f, animationSpec = tween(500, easing = FastOutSlowInEasing))
 
         delay(1800)
-        val intent = Intent(context, OnBoardingActivity::class.java)
+        val intent = Intent(context, LoginActivity::class.java)
         context.startActivity(intent)
         (context as? ComponentActivity)?.finish()
     }

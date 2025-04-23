@@ -11,6 +11,6 @@
     <string name="onBoardingText1">Explore films, books, music, and more tailored just for you.</string>
     <string name="onBoardingText2">Discover content from various cultures and expand your horizons.</string>
     <string name="onBoardingText3">Get recommendations based on your preferences and interests.</string>
-    <string name="server_client_id">818292442267-h4orf4jevj35aegldpa3dulpv9lfj8jr.apps.googleusercontent.com</string>
+    <string name="default_web_client_id">833793740358-1p5iu3eual4t7g1rp8uj1021n6afrdvh.apps.googleusercontent.com</string>
 
 </resources>
