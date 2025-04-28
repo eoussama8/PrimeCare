@@ -1,0 +1,41 @@
+package com.example.primecare.WorkOut
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.primecare.WorkOut.api.Exercise
+import com.example.primecare.WorkOut.api.RetrofitClient
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import retrofit2.Response
+
+class ExerciseViewModel : ViewModel() {
+    private val _exercises = MutableStateFlow<List<Exercise>>(emptyList())
+    val exercises: StateFlow<List<Exercise>> = _exercises
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
+    private val apiKey = "054f89be43msh9aacee51318bb43p1e21f3jsnb83190ff87b2" // Replace with your RapidAPI key
+    private val apiHost = "exercisedb.p.rapidapi.com"
+
+    fun fetchExercises(limit: Int = 10, offset: Int = 0) {
+        viewModelScope.launch {
+            try {
+                val response: Response<List<Exercise>> = RetrofitClient.exerciseApiService.getExercises(
+                    limit = limit,
+                    offset = offset,
+                    apiKey = apiKey,
+                    apiHost = apiHost
+                )
+                if (response.isSuccessful) {
+                    _exercises.value = response.body() ?: emptyList()
+                } else {
+                    _error.value = "Error: ${response.message()}"
+                }
+            } catch (e: Exception) {
+                _error.value = "Network error: ${e.message}"
+            }
+        }
+    }
+}

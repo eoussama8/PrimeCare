@@ -69,8 +69,8 @@ fun SplashScreen() {
         textAlpha.animateTo(1f, animationSpec = tween(500, easing = FastOutSlowInEasing))
         descriptionAlpha.animateTo(1f, animationSpec = tween(500, easing = FastOutSlowInEasing))
 
-        delay(1800)
-        val intent = Intent(context, LoginActivity::class.java)
+        delay(1000)
+        val intent = Intent(context, OnBoardingActivity::class.java)
         context.startActivity(intent)
         (context as? ComponentActivity)?.finish()
     }

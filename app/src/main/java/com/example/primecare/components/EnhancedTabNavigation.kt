@@ -31,8 +31,8 @@ import com.example.primecare.R
 val TabItems = listOf(
     R.drawable.home to "Home",
     R.drawable.meal to "Meals",
-    R.drawable.movie to "Shows",
-    R.drawable.music to "Music",
+    R.drawable.sport to "WorkOut",
+    R.drawable.stats to "Statistics",
     R.drawable.settings to "Settings"
 )
 
@@ -130,5 +130,18 @@ fun EnhancedTabNavigation(
                 }
             }
         }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun EnhancedTabNavigationPreview() {
+    MaterialTheme {
+        EnhancedTabNavigation(
+            selectedTab = 0, // Home tab selected
+            onTabSelected = {}, // Empty callback for static preview
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }
