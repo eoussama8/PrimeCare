@@ -32,7 +32,7 @@ fun ExerciseScreen(navController: NavController, viewModel: ExerciseViewModel = 
     var selectedBodyPart by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        viewModel.fetchExercises(limit = 10, offset = 0)
+        viewModel.fetchExercises()
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -41,11 +41,7 @@ fun ExerciseScreen(navController: NavController, viewModel: ExerciseViewModel = 
             value = searchQuery,
             onValueChange = { query ->
                 searchQuery = query
-                if (query.isNotEmpty()) {
-                    viewModel.searchExercises(query, limit = 10, offset = 0)
-                } else {
-                    viewModel.fetchExercises(limit = 10, offset = 0)
-                }
+                viewModel.searchExercises(query)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -56,7 +52,7 @@ fun ExerciseScreen(navController: NavController, viewModel: ExerciseViewModel = 
                 if (searchQuery.isNotEmpty()) {
                     IconButton(onClick = {
                         searchQuery = ""
-                        viewModel.fetchExercises(limit = 10, offset = 0)
+                        viewModel.fetchExercises()
                     }) {
                         Icon(Icons.Default.Clear, contentDescription = "Clear search")
                     }
@@ -75,7 +71,7 @@ fun ExerciseScreen(navController: NavController, viewModel: ExerciseViewModel = 
                     selected = selectedBodyPart == null,
                     onClick = {
                         selectedBodyPart = null
-                        viewModel.fetchExercises(limit = 10, offset = 0)
+                        viewModel.fetchExercises()
                     },
                     label = { Text("All") }
                 )
@@ -85,7 +81,7 @@ fun ExerciseScreen(navController: NavController, viewModel: ExerciseViewModel = 
                     selected = selectedBodyPart == bodyPart,
                     onClick = {
                         selectedBodyPart = bodyPart
-                        viewModel.fetchExercisesByBodyPart(bodyPart, limit = 10, offset = 0)
+                        viewModel.fetchExercisesByBodyPart(bodyPart)
                     },
                     label = { Text(bodyPart.replaceFirstChar { it.uppercase() }) }
                 )
@@ -119,7 +115,8 @@ fun ExerciseScreen(navController: NavController, viewModel: ExerciseViewModel = 
         ) {
             items(exercises) { exercise ->
                 ExerciseItem(exercise = exercise, onClick = {
-                    navController.navigate("exercise_detail/${exercise.id}")
+                    viewModel.selectExercise(exercise.id)
+                    navController.navigate("exerciseDetail/${exercise.id}")
                 })
             }
         }

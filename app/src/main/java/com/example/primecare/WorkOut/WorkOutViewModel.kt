@@ -13,6 +13,9 @@ class ExerciseViewModel : ViewModel() {
     private val _exercises = MutableStateFlow<List<Exercise>>(emptyList())
     val exercises: StateFlow<List<Exercise>> = _exercises
 
+    private val _selectedExercise = MutableStateFlow<Exercise?>(null)
+    val selectedExercise: StateFlow<Exercise?> = _selectedExercise
+
     private val _bodyParts = MutableStateFlow<List<String>>(emptyList())
     val bodyParts: StateFlow<List<String>> = _bodyParts
 
@@ -27,15 +30,21 @@ class ExerciseViewModel : ViewModel() {
 
     init {
         fetchBodyParts()
+        fetchExercises()
     }
 
-    fun fetchExercises(limit: Int = 10, offset: Int = 0) {
+    fun selectExercise(exerciseId: String) {
+        viewModelScope.launch {
+            val exercise = _exercises.value.find { it.id == exerciseId }
+            _selectedExercise.value = exercise
+        }
+    }
+
+    fun fetchExercises() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 val response: Response<List<Exercise>> = RetrofitClient.exerciseApiService.getExercises(
-                    limit = limit,
-                    offset = offset,
                     apiKey = apiKey,
                     apiHost = apiHost
                 )
@@ -48,14 +57,16 @@ class ExerciseViewModel : ViewModel() {
         }
     }
 
-    fun searchExercises(query: String, limit: Int = 10, offset: Int = 0) {
+    fun searchExercises(query: String) {
+        if (query.isBlank()) {
+            fetchExercises()
+            return
+        }
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 val response: Response<List<Exercise>> = RetrofitClient.exerciseApiService.searchExercises(
-                    name = query,
-                    limit = limit,
-                    offset = offset,
+                    name = query.trim(),
                     apiKey = apiKey,
                     apiHost = apiHost
                 )
@@ -68,14 +79,12 @@ class ExerciseViewModel : ViewModel() {
         }
     }
 
-    fun fetchExercisesByBodyPart(bodyPart: String, limit: Int = 10, offset: Int = 0) {
+    fun fetchExercisesByBodyPart(bodyPart: String) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 val response: Response<List<Exercise>> = RetrofitClient.exerciseApiService.getExercisesByBodyPart(
-                    bodyPart = bodyPart,
-                    limit = limit,
-                    offset = offset,
+                    bodyPart = bodyPart.lowercase(),
                     apiKey = apiKey,
                     apiHost = apiHost
                 )

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,7 +54,7 @@ class MainActivity : ComponentActivity() {
 fun MainScreen(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val mealsViewModel: MealsViewModel = viewModel(factory = MealsViewModelFactory(RetrofitClient.mealApiService))
-    val exerciseViewModel: ExerciseViewModel = viewModel() // Initialize ExerciseViewModel
+    val exerciseViewModel: ExerciseViewModel = viewModel()
     var selectedTab by remember { mutableStateOf(1) } // Start on Meals tab
     val apiKey = BuildConfig.API_KEY
 
@@ -139,8 +140,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 }
                 composable("exerciseDetail/{exerciseId}") { backStackEntry ->
                     val exerciseId = backStackEntry.arguments?.getString("exerciseId")
-                    val exercise = exerciseViewModel.exercises.value.find { it.id == exerciseId }
-                    if (exercise == null) {
+                    if (exerciseId == null) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -149,10 +149,20 @@ fun MainScreen(modifier: Modifier = Modifier) {
                         }
                     } else {
                         Log.d("MainScreen", "Rendering ExerciseDetailScreen for ID: $exerciseId")
-                        ExerciseDetailScreen(
-                            exercise = exercise,
-                            navController = navController,
-                        )
+                        val exercise by exerciseViewModel.selectedExercise.collectAsState()
+                        if (exercise == null) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("Exercise not found")
+                            }
+                        } else {
+                            ExerciseDetailScreen(
+                                exercise = exercise!!,
+                                navController = navController,
+                            )
+                        }
                     }
                 }
             }
