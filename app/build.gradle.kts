@@ -6,6 +6,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+    id("com.google.devtools.ksp")
+    id ("org.jetbrains.kotlin.plugin.serialization") version("1.8.0") // Use the appropriate version of Kotlin
+
 
 }
 
@@ -38,6 +41,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -135,4 +139,16 @@ dependencies {
 
     implementation ("com.github.bumptech.glide:compose:1.0.0-beta01")
     implementation ("com.google.accompanist:accompanist-swiperefresh:0.36.0")
+
+
+    implementation("io.ktor:ktor-client-core:2.0.0")
+    implementation("io.ktor:ktor-client-cio:2.0.0")
+    implementation("io.ktor:ktor-client-content-negotiation:2.0.0")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.0.0")
+
+    // Room dependencies
+    implementation("androidx.room:room-runtime:2.5.2")
+    implementation("androidx.room:room-ktx:2.5.2") // Add this line for coroutine support
+    ksp("androidx.room:room-compiler:2.5.0")
+
 }

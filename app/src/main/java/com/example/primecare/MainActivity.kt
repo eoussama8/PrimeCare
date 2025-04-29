@@ -30,6 +30,8 @@ import com.example.primecare.Meals.ui.MealsScreen
 import com.example.primecare.Settings.SettingsScreen
 import com.example.primecare.Statistics.StatisticsScreen
 import com.example.primecare.WorkOut.ExerciseScreen
+import com.example.primecare.WorkOut.ExerciseDetailScreen
+import com.example.primecare.WorkOut.ExerciseViewModel
 import com.example.primecare.components.EnhancedTabNavigation
 import com.example.primecare.data.ThemePreferences
 import com.example.primecare.ui.theme.PrimeCareTheme
@@ -51,6 +53,7 @@ class MainActivity : ComponentActivity() {
 fun MainScreen(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val mealsViewModel: MealsViewModel = viewModel(factory = MealsViewModelFactory(RetrofitClient.mealApiService))
+    val exerciseViewModel: ExerciseViewModel = viewModel() // Initialize ExerciseViewModel
     var selectedTab by remember { mutableStateOf(1) } // Start on Meals tab
     val apiKey = BuildConfig.API_KEY
 
@@ -103,7 +106,10 @@ fun MainScreen(modifier: Modifier = Modifier) {
                             },
                             modifier = Modifier.padding(innerPadding).fillMaxSize()
                         )
-                        2 -> ExerciseScreen()
+                        2 -> ExerciseScreen(
+                            navController = navController,
+                            viewModel = exerciseViewModel,
+                        )
                         3 -> StatisticsScreen(
                             modifier = Modifier.padding(innerPadding).fillMaxSize()
                         )
@@ -128,6 +134,24 @@ fun MainScreen(modifier: Modifier = Modifier) {
                             mealId = mealId,
                             apiKey = apiKey,
                             modifier = Modifier.padding(innerPadding).fillMaxSize()
+                        )
+                    }
+                }
+                composable("exerciseDetail/{exerciseId}") { backStackEntry ->
+                    val exerciseId = backStackEntry.arguments?.getString("exerciseId")
+                    val exercise = exerciseViewModel.exercises.value.find { it.id == exerciseId }
+                    if (exercise == null) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Invalid Exercise ID")
+                        }
+                    } else {
+                        Log.d("MainScreen", "Rendering ExerciseDetailScreen for ID: $exerciseId")
+                        ExerciseDetailScreen(
+                            exercise = exercise,
+                            navController = navController,
                         )
                     }
                 }
