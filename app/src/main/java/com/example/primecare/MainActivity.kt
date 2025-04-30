@@ -1,5 +1,6 @@
 package com.example.primecare
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -8,9 +9,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,11 +21,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.primecare.Home.HomeScreen
+import com.example.primecare.Home.BlogScreen
+import com.example.primecare.Home.BlogViewModel
+import com.example.primecare.Home.CreatePostScreen
 import com.example.primecare.Meals.MealsViewModel
 import com.example.primecare.Meals.MealsViewModelFactory
 import com.example.primecare.Meals.api.RetrofitClient
@@ -36,6 +44,9 @@ import com.example.primecare.WorkOut.ExerciseViewModel
 import com.example.primecare.components.EnhancedTabNavigation
 import com.example.primecare.data.ThemePreferences
 import com.example.primecare.ui.theme.PrimeCareTheme
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 class MainActivity : ComponentActivity() {
     private val themePreferences = ThemePreferences(this)
@@ -55,8 +66,32 @@ fun MainScreen(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val mealsViewModel: MealsViewModel = viewModel(factory = MealsViewModelFactory(RetrofitClient.mealApiService))
     val exerciseViewModel: ExerciseViewModel = viewModel()
-    var selectedTab by remember { mutableStateOf(1) } // Start on Meals tab
     val apiKey = BuildConfig.API_KEY
+    val auth = Firebase.auth
+    var selectedTab by remember { mutableStateOf(1) } // Start on Meals tab
+    var currentUserId by remember { mutableStateOf(auth.currentUser?.uid ?: "") }
+    var isAuthLoading by remember { mutableStateOf(auth.currentUser == null) }
+
+    // Handle Firebase Authentication
+    LaunchedEffect(Unit) {
+        if (auth.currentUser == null) {
+            auth.signInAnonymously().addOnSuccessListener {
+                currentUserId = auth.currentUser?.uid ?: ""
+                isAuthLoading = false
+                Log.d("MainScreen", "Anonymous login successful: $currentUserId")
+            }.addOnFailureListener { e ->
+                isAuthLoading = false
+                Log.e("MainScreen", "Anonymous login failed: ${e.message}")
+            }
+        } else {
+            isAuthLoading = false
+        }
+    }
+
+    // Instantiate BlogViewModel with context and currentUserId
+    val blogViewModel: BlogViewModel = viewModel(
+        factory = BlogViewModelFactory(LocalContext.current, currentUserId)
+    )
 
     Log.d("MainScreen", "API Key: $apiKey") // Debug API key
 
@@ -66,6 +101,13 @@ fun MainScreen(modifier: Modifier = Modifier) {
             contentAlignment = Alignment.Center
         ) {
             Text("API Key is missing. Please configure it in local.properties.")
+        }
+    } else if (isAuthLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
         }
     } else {
         Scaffold(
@@ -95,7 +137,10 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     Log.d("MainScreen", "Rendering tab: $tabIndex")
 
                     when (tabIndex) {
-                        0 -> HomeScreen(
+                        0 -> BlogScreen(
+                            viewModel = blogViewModel,
+                            currentUserId = currentUserId,
+                            onNavigateToCreatePost = { navController.navigate("createPost") },
                             modifier = Modifier.padding(innerPadding).fillMaxSize()
                         )
                         1 -> MealsScreen(
@@ -118,6 +163,14 @@ fun MainScreen(modifier: Modifier = Modifier) {
                             modifier = Modifier.padding(innerPadding).fillMaxSize()
                         )
                     }
+                }
+                composable("createPost") {
+                    CreatePostScreen(
+                        viewModel = blogViewModel,
+                        currentUserId = currentUserId,
+                        onPostCreated = { navController.popBackStack() },
+                        modifier = Modifier.padding(innerPadding).fillMaxSize()
+                    )
                 }
                 composable("mealDetail/{mealId}") { backStackEntry ->
                     val mealId = backStackEntry.arguments?.getString("mealId")?.toIntOrNull()
@@ -167,5 +220,16 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 }
             }
         }
+    }
+}
+
+// ViewModel Factory for BlogViewModel
+class BlogViewModelFactory(private val context: Context, private val currentUserId: String) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(BlogViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return BlogViewModel(context, currentUserId) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

@@ -71,15 +71,23 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             if (firstName.isNotEmpty() && lastName.isNotEmpty() && weight.isNotEmpty() &&
                 height.isNotEmpty() && genre.isNotEmpty() && age.isNotEmpty()) {
 
-                // Convert weight and height to Double
+                // Convert weight, height, and age to Double/Int
                 val weightValue = weight.toDoubleOrNull() ?: 0.0
                 val heightValue = height.toDoubleOrNull() ?: 0.0
                 val ageValue = age.toIntOrNull() ?: 0
+
+                if (weightValue <= 0.0 || heightValue <= 0.0 || ageValue <= 0) {
+                    Toast.makeText(context, "Please enter valid positive values.", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                val firebaseId = "your_firebase_id" // Replace with actual Firebase ID
 
                 Log.d("SettingsScreen", "Saving user data: FirstName: $firstName, LastName: $lastName, Weight: $weightValue, Height: $heightValue, Gender: $genre, Age: $ageValue")
 
                 scope.launch {
                     val user = User(
+                        firebaseId = firebaseId,
                         firstName = firstName,
                         lastName = lastName,
                         weight = weightValue,

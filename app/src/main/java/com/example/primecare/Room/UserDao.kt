@@ -17,7 +17,9 @@ interface UserDao {
     @Delete
     suspend fun delete(user: User)
 
-    // Query to get the first user in the database
     @Query("SELECT * FROM users LIMIT 1")
     suspend fun getFirstUser(): User?
+
+    @Query("SELECT * FROM users WHERE firebaseId = :firebaseId")
+    suspend fun getUserByFirebaseId(firebaseId: String): User?
 }

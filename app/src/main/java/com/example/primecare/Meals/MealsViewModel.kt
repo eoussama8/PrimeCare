@@ -80,7 +80,11 @@ class MealsViewModel(private val apiService: MealApiService) : ViewModel() {
             }
         }
     }
-}
+
+    // Optionally, you could expose methods to get specific categories if needed
+    fun getCategories(): CategoriesState {
+        return _categoriesState.value
+    }}
 
 // State for meals
 sealed class MealsState {
