@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.primecare.Room.AppDB
 import com.example.primecare.Room.User
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,6 +39,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
     fun loadUserData() {
         scope.launch {
             try {
+                Log.d("SettingsScreen", "Loading user data...")
                 withContext(Dispatchers.IO) {
                     val db = AppDB.getDatabase(context)
                     val user = db.userDao().getFirstUser() // Fetch the first user
@@ -65,9 +67,32 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
         loadUserData()
     }
 
+    // Function to save user data to Firebase
+    fun saveUserDataToFirebase(user: User) {
+        try {
+            val db = FirebaseFirestore.getInstance()
+            // Save or update the user data in Firebase Firestore
+            db.collection("users")
+                .document(user.firebaseId)  // Using the firebaseId as the document ID
+                .set(user)  // This will save or update the user document
+                .addOnSuccessListener {
+                    Log.d("SettingsScreen", "User data saved to Firebase: $user")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("SettingsScreen", "Error saving user data to Firebase: $e")
+                    Toast.makeText(context, "Error saving data to Firebase", Toast.LENGTH_SHORT).show()
+                }
+        } catch (e: Exception) {
+            Log.e("SettingsScreen", "Error saving user data to Firebase: ${e.message}", e)
+            Toast.makeText(context, "Error saving data to Firebase", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     // Function to save or update user data
     fun saveUserData() {
         try {
+            Log.d("SettingsScreen", "Attempting to save user data...")
+
             if (firstName.isNotEmpty() && lastName.isNotEmpty() && weight.isNotEmpty() &&
                 height.isNotEmpty() && genre.isNotEmpty() && age.isNotEmpty()) {
 
@@ -78,10 +103,11 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
 
                 if (weightValue <= 0.0 || heightValue <= 0.0 || ageValue <= 0) {
                     Toast.makeText(context, "Please enter valid positive values.", Toast.LENGTH_SHORT).show()
+                    Log.e("SettingsScreen", "Invalid input values: Weight: $weightValue, Height: $heightValue, Age: $ageValue")
                     return
                 }
 
-                val firebaseId = "your_firebase_id" // Replace with actual Firebase ID
+                val firebaseId = "userId" // Replace with actual Firebase ID
 
                 Log.d("SettingsScreen", "Saving user data: FirstName: $firstName, LastName: $lastName, Weight: $weightValue, Height: $heightValue, Gender: $genre, Age: $ageValue")
 
@@ -96,15 +122,22 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                         age = ageValue
                     )
 
-                    // If the user data exists, update it; otherwise, insert
+                    // Save to Firebase Firestore
+                    saveUserDataToFirebase(user)
+
+                    // Save to Room database
                     withContext(Dispatchers.IO) {
                         val db = AppDB.getDatabase(context)
-                        if (isEditMode) {
-                            db.userDao().update(user) // Update if data already exists
-                            Log.d("SettingsScreen", "User data updated: $user")
-                        } else {
-                            db.userDao().insert(user) // Insert new user if no data
-                            Log.d("SettingsScreen", "New user data saved: $user")
+                        try {
+                            if (isEditMode) {
+                                db.userDao().update(user) // Update if data already exists
+                                Log.d("SettingsScreen", "User data updated in Room: $user")
+                            } else {
+                                db.userDao().insert(user) // Insert new user if no data
+                                Log.d("SettingsScreen", "New user data saved in Room: $user")
+                            }
+                        } catch (e: Exception) {
+                            Log.e("SettingsScreen", "Error saving user data to Room: ${e.message}", e)
                         }
                     }
 
