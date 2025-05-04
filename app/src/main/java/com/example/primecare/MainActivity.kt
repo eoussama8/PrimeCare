@@ -55,14 +55,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PrimeCareTheme(themePreferences = themePreferences) {
-                MainScreen()
+                MainScreen(themePreferences = themePreferences)
             }
         }
     }
 }
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
+fun MainScreen(modifier: Modifier = Modifier,themePreferences:ThemePreferences) {
     val navController = rememberNavController()
     val mealsViewModel: MealsViewModel = viewModel(factory = MealsViewModelFactory(RetrofitClient.mealApiService))
     val exerciseViewModel: ExerciseViewModel = viewModel()
@@ -160,6 +160,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
                             modifier = Modifier.padding(innerPadding).fillMaxSize()
                         )
                         4 -> SettingsScreen(
+
+                            themePreferences = themePreferences,
                             modifier = Modifier.padding(innerPadding).fillMaxSize()
                         )
                     }
