@@ -13,4 +13,63 @@
     <string name="onBoardingText3">Get recommendations based on your preferences and interests.</string>
     <string name="default_web_client_id">833793740358-1p5iu3eual4t7g1rp8uj1021n6afrdvh.apps.googleusercontent.com</string>
 
+    <string name="skip">Skip</string>
+    <string name="get_started">GET STARTED</string>
+    <!-- Onboarding Screen 1 -->
+    <string name="onboarding_description_1">Elevate Fitness Journey with a Custom-Edge to Fuel Your Motivation &amp; Crush Your Goals</string>
+
+    <!-- Onboarding Screen 2 -->
+    <string name="onboarding_description_2">Get customized workout plans that match your fitness level, goals, and available equipment.</string>
+
+    <!-- Onboarding Screen 3 -->
+    <string name="onboarding_description_3">Access professional trainers for guidance, form correction, and motivation to achieve your fitness goals.</string>
+
+    <!-- Onboarding Screen 4 -->
+    <string name="onboarding_title_4">Join the Community</string>
+    <string name="onboarding_description_4">Be part of a supportive fitness community, join challenges, and celebrate achievements together.</string>
+
+    <!-- General strings used in the app -->
+    <string name="welcome_back">Welcome Back</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="or_continue_with">Or continue with</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="already_have_account">Already have an account?</string>
+
+    <!-- Error messages -->
+    <string name="error_invalid_email">Please enter a valid email address</string>
+    <string name="error_password_short">Password must be at least 6 characters</string>
+    <string name="error_network">Network error. Please check your connection.</string>
+
+    <!-- Success messages -->
+    <string name="success_sign_in">Sign in successful!</string>
+    <string name="success_sign_up">Account created successfully!</string>
+
+        <!-- App Name -->
+
+        <!-- Onboarding Screen -->
+
+    <!-- Onboarding Screen 1 -->
+    <string name="onboarding_title_1">Welcome to PrimeCare</string>
+    <string name="onboarding_desc_1">Your personal healthcare companion designed to make wellness management simple and effective.</string>
+
+    <!-- Onboarding Screen 2 -->
+    <string name="onboarding_title_2">Expert Medical Support</string>
+    <string name="onboarding_desc_2">Connect with certified healthcare professionals and receive personalized advice whenever you need it.</string>
+
+    <!-- Onboarding Screen 3 -->
+    <string name="onboarding_title_3">Track Your Health Journey</string>
+    <string name="onboarding_desc_3">Monitor vital signs, medication schedules, and wellness goals all in one secure and easy-to-use platform.</string>
+
+    <!-- Navigation -->
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+
+    <!-- Additional strings needed for the onboarding flow -->
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="by_continuing">By continuing, you agree to our %1$s and %2$s</string>
 </resources>

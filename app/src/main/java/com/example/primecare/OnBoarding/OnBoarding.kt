@@ -1,32 +1,24 @@
 package com.example.primecare.OnBoarding
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.pager.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.*
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,7 +30,6 @@ import com.example.primecare.ui.theme.MainColor
 import com.example.primecare.ui.theme.White
 import com.example.primecare.ui.theme.Black
 import kotlinx.coroutines.launch
-import kotlin.math.absoluteValue
 
 @Composable
 fun OnBoarding(onFinish: () -> Unit = {}) {
@@ -47,280 +38,592 @@ fun OnBoarding(onFinish: () -> Unit = {}) {
     val pagerState = rememberPagerState(pageCount = { items.size })
     val currentPage = pagerState.currentPage
 
+    // Enhanced animations
+    val pageTransition = rememberInfiniteTransition(label = "pageTransition")
+    val pulseAnimation = pageTransition.animateFloat(
+        initialValue = 0.92f,
+        targetValue = 1.08f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2500, easing = EaseInOutQuad),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse"
+    )
+
+    // Floating particles animation
+    val particleTransition = rememberInfiniteTransition(label = "particleTransition")
+    val particleOffset = particleTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(8000, easing = EaseInOutQuad),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "particleFloat"
+    )
+
     Box(modifier = Modifier.fillMaxSize()) {
-        // Onboarding Pager
+        // Onboarding Pager with improved transition
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            pageSpacing = 0.dp,
         ) { page ->
-            val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
-            val absPageOffset = pageOffset.absoluteValue
+            OnBoardingPage(
+                item = items[page],
+                isLastPage = page == items.size - 1,
+                onGetStartedClick = onFinish
+            )
+        }
 
-            // Simple parallax effect
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        alpha = 1f - (absPageOffset * 0.5f).coerceAtMost(1f)
-                        translationX = size.width * (pageOffset * -0.1f)
-                    }
-            ) {
-                // Background Image
-                Image(
-                    painter = painterResource(id = items[page].image),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
+        // Floating particles effect
+        Canvas(modifier = Modifier
+            .fillMaxSize()
+            .alpha(0.3f)
+            .zIndex(1f)
+        ) {
+            repeat(8) { i ->
+                val x = size.width * (0.2f + (i * 0.1f) + particleOffset.value * 0.02f)
+                val y = size.height * (0.3f + (i * 0.1f * particleOffset.value))
+                val particleSize = 5.dp.toPx() + (i % 3) * 2.dp.toPx()
 
-                // Gradient overlay for better text readability
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color.Black.copy(alpha = 0.6f)
-                                )
-                            )
-                        )
-                )
-
-                // Onboarding content directly on the image
-                OnBoardingContent(
-                    items = items[page],
-                    isLastPage = page == items.size - 1,
-                    onButtonClick = {
-                        if (page == items.size - 1) {
-                            onFinish()
-                        } else {
-                            scope.launch {
-                                pagerState.animateScrollToPage(page + 1)
-                            }
-                        }
-                    }
+                drawCircle(
+                    color = White.copy(alpha = 0.3f - (i * 0.02f)),
+                    radius = particleSize,
+                    center = Offset(x, y)
                 )
             }
         }
 
-        // Top bar with skip button
+        // App Logo with subtle glow effect
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
-                .zIndex(2f)
+                .padding(top = 36.dp)
+                .height(48.dp)
+                .align(Alignment.TopCenter)
+                .zIndex(3f)
         ) {
-            // Simple progress text
-            Text(
-                text = "${currentPage + 1}/${items.size}",
-                style = Typography.labelSmall.copy(
-                    color = White,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp
-                ),
-                modifier = Modifier.align(Alignment.CenterStart)
+            // Logo glow effect
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .align(Alignment.Center)
+                    .scale(pulseAnimation.value * 0.7f + 0.5f)
+                    .alpha(0.2f)
+                    .background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                MainColor.copy(alpha = 0.6f),
+                                MainColor.copy(alpha = 0f)
+                            )
+                        ),
+                        shape = CircleShape
+                    )
             )
 
-            // Skip button
-            Button(
-                onClick = { onFinish() },
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MainColor,
-                    contentColor = White
-                ),
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .semantics { contentDescription = "Skip onboarding" }
-            ) {
-                Text(
-                    text = "Skip",
-                    style = Typography.labelSmall.copy(
-                        color = White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
+            // Logo text with enhanced styling
+            Text(
+                text = "PrimeCare",
+                style = Typography.headlineMedium.copy(
+                    color = White,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 26.sp,
+                    letterSpacing = 0.5.sp,
+                    shadow = Shadow(
+                        color = MainColor.copy(alpha = 0.5f),
+                        offset = Offset(0f, 2f),
+                        blurRadius = 4f
                     )
-                )
+                ),
+                modifier = Modifier.align(Alignment.Center),
+                textAlign = TextAlign.Center
+            )
+        }
+
+        // Top navigation area with improved skip button
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 32.dp, end = 20.dp)
+                .zIndex(2f),
+            horizontalArrangement = Arrangement.End
+        ) {
+            // Skip button with enhanced visual feedback
+            if (currentPage < items.size - 1) {
+                val buttonHover = remember { mutableStateOf(false) }
+                TextButton(
+                    onClick = { onFinish() },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = White
+                    ),
+                    modifier = Modifier
+                        .height(40.dp)
+                        .width(88.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    MainColor.copy(alpha = 0.5f),
+                                    MainColor.copy(alpha = 0.3f)
+                                ),
+                                start = Offset(0f, 0f),
+                                end = Offset(88f, 40f)
+                            )
+                        )
+                        .border(
+                            width = 1.5.dp,
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    White.copy(alpha = 0.8f),
+                                    White.copy(alpha = 0.2f)
+                                )
+                            ),
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .graphicsLayer {
+                            shadowElevation = 8f
+                            shape = RoundedCornerShape(20.dp)
+                        }
+                ) {
+                    Text(
+                        text = stringResource(R.string.skip),
+                        style = Typography.labelMedium.copy(
+                            color = White,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.5.sp
+                        )
+                    )
+                }
             }
         }
 
-        // Bottom page indicators
+        // Enhanced page indicator with animation
         Row(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 32.dp)
+                .padding(bottom = 140.dp)
                 .align(Alignment.BottomCenter)
-                .zIndex(1f)
+                .zIndex(2f)
         ) {
             repeat(items.size) { position ->
-                PageIndicator(
-                    isSelected = position == currentPage
-                )
-            }
-        }
-    }
-}
+                val isSelected = position == currentPage
+                val indicatorSize = if (isSelected) 16.dp else 8.dp
+                val indicatorColor = if (isSelected) {
+                    MainColor
+                } else {
+                    White.copy(alpha = 0.6f)
+                }
 
-@Composable
-fun PageIndicator(isSelected: Boolean) {
-    // Simple page indicator
-    val width by animateFloatAsState(
-        targetValue = if (isSelected) 24f else 8f,
-        animationSpec = tween(300),
-        label = "indicator width"
-    )
-
-    Box(
-        modifier = Modifier
-            .padding(horizontal = 4.dp)
-            .width(width.dp)
-            .height(8.dp)
-            .clip(CircleShape)
-            .background(if (isSelected) MainColor else White.copy(alpha = 0.5f))
-    )
-}
-
-@Composable
-fun OnBoardingContent(
-    items: OnBoardingItems,
-    isLastPage: Boolean,
-    onButtonClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 80.dp),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-        ) {
-            // Icon (optional)
-            items.icon?.let { iconResId ->
-                AnimatedVisibility(
-                    visible = true,
-                    enter = fadeIn(tween(600)) +
-                            slideInVertically(
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioMediumBouncy
-                                ),
-                                initialOffsetY = { it / 2 }
-                            )
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 6.dp)
+                        .size(indicatorSize)
+                        .clip(CircleShape)
+                        .background(indicatorColor)
+                        .then(
+                            if (isSelected) {
+                                Modifier
+                                    .border(
+                                        width = 2.dp,
+                                        brush = Brush.radialGradient(
+                                            colors = listOf(
+                                                White.copy(alpha = 0.9f),
+                                                MainColor.copy(alpha = 0.2f)
+                                            )
+                                        ),
+                                        shape = CircleShape
+                                    )
+                                    .scale(pulseAnimation.value)
+                                    .shadow(
+                                        elevation = 4.dp,
+                                        shape = CircleShape,
+                                        spotColor = MainColor
+                                    )
+                            } else {
+                                Modifier
+                            }
+                        )
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clip(CircleShape)
-                            .background(MainColor.copy(alpha = 0.8f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(id = iconResId),
-                            contentDescription = null,
-                            tint = White,
-                            modifier = Modifier.size(40.dp)
+                    // Inner glow for selected indicator
+                    if (isSelected) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .align(Alignment.Center)
+                                .clip(CircleShape)
+                                .background(
+                                    White.copy(alpha = 0.8f)
+                                )
                         )
                     }
                 }
             }
+        }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Title
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(tween(600, delayMillis = 300)) +
-                        slideInVertically(
-                            initialOffsetY = { it / 2 }
+        // Navigation buttons with floating effect and improved layout
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 36.dp)
+                .align(Alignment.BottomCenter)
+                .height(60.dp)
+                .zIndex(2f)
+        ) {
+            // Previous button with enhanced styling
+            if (currentPage > 0) {
+                OutlinedButton(
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(
+                                currentPage - 1,
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    stiffness = Spring.StiffnessLow
+                                )
+                            )
+                        }
+                    },
+                    border = BorderStroke(
+                        width = 1.5.dp,
+                        brush = Brush.linearGradient(
+                            colors = listOf(White.copy(alpha = 0.8f), MainColor.copy(alpha = 0.3f))
                         )
-            ) {
-                Text(
-                    text = stringResource(id = items.title),
-                    style = Typography.titleLarge.copy(
-                        color = White,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp
-                    )
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Description
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(tween(600, delayMillis = 500)) +
-                        slideInVertically(
-                            initialOffsetY = { it / 2 }
-                        )
-            ) {
-                Text(
-                    text = stringResource(id = items.description),
-                    style = Typography.bodyLarge.copy(
-                        color = White,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 24.sp
                     ),
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+                    shape = RoundedCornerShape(30.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = White
+                    ),
+                    modifier = Modifier
+                        .width(130.dp)
+                        .height(60.dp)
+                        .graphicsLayer {
+                            shadowElevation = 8f
+                            shape = RoundedCornerShape(30.dp)
+                        }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.back),
+                        contentDescription = "Previous",
+                        modifier = Modifier.size(20.dp),
+                        tint = White
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Previous",
+                        style = Typography.labelLarge.copy(
+                            color = White,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp,
+                            letterSpacing = 0.5.sp
+                        )
+                    )
+                }
+            } else {
+                // Empty placeholder with improved layout
+                Spacer(modifier = Modifier.width(130.dp))
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // CTA button
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(tween(600, delayMillis = 700)) +
-                        slideInVertically(
-                            initialOffsetY = { it / 2 }
-                        )
-            ) {
+            // Next button with enhanced styling and effects
+            if (currentPage < items.size - 1) {
                 Button(
-                    onClick = onButtonClick,
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(
+                                currentPage + 1,
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    stiffness = Spring.StiffnessLow
+                                )
+                            )
+                        }
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MainColor
                     ),
-                    shape = RoundedCornerShape(24.dp),
-                    contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp),
+                    shape = RoundedCornerShape(30.dp),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 6.dp,
+                        pressedElevation = 10.dp
+                    ),
                     modifier = Modifier
-                        .height(56.dp)
-                        .fillMaxWidth(0.8f)
-                        .semantics {
-                            contentDescription = if (isLastPage) "Get Started" else "Next"
+                        .width(130.dp)
+                        .height(60.dp)
+                        .graphicsLayer {
+                            shadowElevation = 12f
+                            shape = RoundedCornerShape(30.dp)
                         }
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = if (isLastPage) "GET STARTED" else "CONTINUE",
-                            style = Typography.labelLarge.copy(
-                                color = White,
-                                fontWeight = FontWeight.Bold
-                            )
+                    Text(
+                        text = "Next",
+                        style = Typography.labelLarge.copy(
+                            color = White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            letterSpacing = 0.5.sp
                         )
-
-                        if (!isLastPage) {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Icon(
-                                painter = painterResource(id = android.R.drawable.ic_media_play),
-                                contentDescription = null,
-                                tint = White,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        painter = painterResource(id = R.drawable.right),
+                        contentDescription = "Next",
+                        modifier = Modifier.size(20.dp),
+                        tint = White
+                    )
                 }
             }
         }
     }
 }
 
-// Data class for onboarding items
+@Composable
+fun OnBoardingPage(
+    item: OnBoardingItems,
+    isLastPage: Boolean,
+    onGetStartedClick: () -> Unit
+) {
+    // Enhanced animation states with improved timing
+    val imageScale = remember { Animatable(0.85f) }
+    val contentAlpha = remember { Animatable(0f) }
+    val contentSlide = remember { Animatable(50f) }
+
+    LaunchedEffect(key1 = item.title) {
+        // Reset animations when page changes
+        imageScale.snapTo(0.85f)
+        contentAlpha.snapTo(0f)
+        contentSlide.snapTo(50f)
+
+        // Start animations with sequential timing
+        imageScale.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(1200, easing = EaseOutQuart)
+        )
+        contentAlpha.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(1000, delayMillis = 200)
+        )
+        contentSlide.animateTo(
+            targetValue = 0f,
+            animationSpec = tween(1000, delayMillis = 200, easing = EaseOutQuint)
+        )
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Full screen background image with enhanced scale animation
+        Image(
+            painter = painterResource(id = item.image),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = imageScale.value
+                    scaleY = imageScale.value
+                    alpha = contentAlpha.value
+                }
+        )
+
+        // Enhanced gradient overlay with better blending
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            MainColor.copy(alpha = 0.02f),
+                            MainColor.copy(alpha = 0.10f),
+                            MainColor.copy(alpha = 0.25f),
+                            MainColor.copy(alpha = 0.45f),
+                            Color.Black.copy(alpha = 0.80f)
+                        ),
+                        startY = 100f
+                    )
+                )
+        )
+
+        // Enhanced decorative elements
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    alpha = contentAlpha.value * 0.8f
+                }
+        ) {
+            // Multiple decorative arcs for depth
+            drawArc(
+                color = MainColor.copy(alpha = 0.15f),
+                startAngle = 270f,
+                sweepAngle = 120f,
+                useCenter = false,
+                style = Stroke(width = 140f),
+                size = Size(size.width * 1.6f, size.height * 0.7f),
+                topLeft = Offset(-size.width * 0.3f, size.height * 0.5f)
+            )
+
+            drawArc(
+                color = White.copy(alpha = 0.05f),
+                startAngle = 260f,
+                sweepAngle = 140f,
+                useCenter = false,
+                style = Stroke(width = 80f),
+                size = Size(size.width * 1.2f, size.height * 0.5f),
+                topLeft = Offset(-size.width * 0.1f, size.height * 0.55f)
+            )
+
+            // Additional accent elements
+            drawCircle(
+                color = MainColor.copy(alpha = 0.08f),
+                radius = size.width * 0.4f,
+                center = Offset(size.width * 0.8f, size.height * 0.2f)
+            )
+        }
+
+        // Enhanced content area with improved animations and styling
+        Column(
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 28.dp)
+                .padding(bottom = if (isLastPage) 120.dp else 160.dp)
+                .graphicsLayer {
+                    alpha = contentAlpha.value
+                    translationY = contentSlide.value
+                }
+        ) {
+            // Enhanced title with better typography and animation
+            Text(
+                text = stringResource(id = item.title),
+                style = Typography.headlineLarge.copy(
+                    color = White,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 36.sp,
+                    lineHeight = 42.sp,
+                    letterSpacing = (-0.5).sp,
+                    shadow = Shadow(
+                        color = Black.copy(alpha = 0.5f),
+                        offset = Offset(0f, 2f),
+                        blurRadius = 4f
+                    )
+                ),
+                modifier = Modifier.padding(bottom = 22.dp)
+            )
+
+            // Enhanced description with better readability
+            Text(
+                text = stringResource(id = item.description),
+                style = Typography.bodyLarge.copy(
+                    color = White.copy(alpha = 0.95f),
+                    lineHeight = 28.sp,
+                    fontSize = 18.sp,
+                    letterSpacing = 0.25.sp,
+                    shadow = Shadow(
+                        color = Black.copy(alpha = 0.3f),
+                        offset = Offset(0f, 1f),
+                        blurRadius = 2f
+                    )
+                ),
+                modifier = Modifier
+                    .padding(bottom = 38.dp)
+                    .fillMaxWidth(0.95f)
+            )
+
+            // Enhanced Get Started button with better visual effects
+            if (isLastPage) {
+                // Custom pulsating animation for the button
+                val buttonTransition = rememberInfiniteTransition(label = "buttonEffects")
+                val buttonScale = buttonTransition.animateFloat(
+                    initialValue = 1f,
+                    targetValue = 1.05f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(2000, easing = EaseInOutQuad),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "buttonPulse"
+                )
+
+                val glowAlpha = buttonTransition.animateFloat(
+                    initialValue = 0.2f,
+                    targetValue = 0.4f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(1500, easing = EaseInOutQuad),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "glowPulse"
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp)
+                        .graphicsLayer {
+                            scaleX = buttonScale.value
+                            scaleY = buttonScale.value
+                        }
+                ) {
+                    // Enhanced button glow effect
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .offset(y = 4.dp)
+                            .scale(1.1f)
+                            .alpha(glowAlpha.value)
+                            .clip(RoundedCornerShape(32.dp))
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        MainColor.copy(alpha = 0.7f),
+                                        MainColor.copy(alpha = 0f)
+                                    )
+                                )
+                            )
+                    )
+
+                    // Improved button with better elevation
+                    Button(
+                        onClick = onGetStartedClick,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MainColor
+                        ),
+                        shape = RoundedCornerShape(32.dp),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 10.dp,
+                            pressedElevation = 16.dp
+                        ),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(32.dp))
+                    ) {
+                        Text(
+                            text = stringResource(R.string.get_started),
+                            style = Typography.labelLarge.copy(
+                                color = White,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 20.sp,
+                                letterSpacing = 0.5.sp
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        // Enhanced arrow icon with subtle animation
+                        Icon(
+                            painter = painterResource(id = R.drawable.right),
+                            contentDescription = "Get Started",
+                            tint = White,
+                            modifier = Modifier
+                                .size(22.dp)
+                                .graphicsLayer {
+                                    scaleX = 1.1f
+                                    scaleY = 1.1f
+                                }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
